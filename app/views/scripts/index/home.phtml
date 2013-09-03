@@ -1,0 +1,168 @@
+<?php
+
+?>
+<div id="member-sidebar">
+    <? if ($this->availableForms && $this->submissionChapters): ?>
+        <fieldset>
+            <legend>Create New</legend>
+            <? if (1 === count($this->submissionChapters)): ?>
+                <ul>
+                <? foreach ($this->availableForms as $label => $url): ?>
+                    <li>
+                        <a href="<?= $this->escape('/' . $this->submissionChapters[0]->getSlug() . '/submission/' . $url . '/create') ?>">
+                            <?= $this->escape($label) ?>
+                        </a>
+                    </li>
+                <? endforeach; ?>
+                </ul>
+            <? else: ?>
+                <label for="submission-create-chapter">Chapter</label>
+                <select id="submission-create-chapter">
+                    <? foreach ($this->submissionChapters as $chapter): ?>
+                        <option value="<?= $this->escape($chapter->getSlug()) ?>"><?= $this->escape($chapter->getFullName()) ?></option>
+                    <? endforeach; ?>
+                </select>
+                
+                <ul id="submission-create-prefixLinks">
+                <? foreach ($this->availableForms as $label => $url): ?>
+                    <li>
+                        <a href="<?= $this->escape($url) ?>">
+                            <?= $this->escape($label) ?>
+                        </a>
+                    </li>
+                <? endforeach; ?>
+                </ul>
+                <script type="text/javascript">
+                
+                $(function () {
+                    var createLinks = $('#submission-create-prefixLinks a'),
+                        createChapter = $('#submission-create-chapter');
+                    
+                    createLinks.each(function () {
+                        var self = $(this);
+                        self.data('baseCreateSubmissionHref', self.attr('href'));
+                    });
+                    
+                    
+                    function updateCreateSubmissionLinks() {
+                        var chapterSlug = createChapter.val();
+                        
+                        createLinks.each(function () {
+                            var self = $(this),
+                                base = self.data('baseCreateSubmissionHref');
+
+                            self.attr('href', '/' + chapterSlug + '/submission/' + base + '/create');
+                        });
+                    }
+                    
+                    createChapter.bind({
+                        'change keypress click': function () {
+                            updateCreateSubmissionLinks();
+                        }
+                    });
+                    
+                    updateCreateSubmissionLinks();
+                });
+                
+                </script>
+            <? endif; ?>
+        </fieldset>
+    <? endif; ?>
+</div>
+<div id="member-main">
+    <?= $this->partial('member/details.phtml', array(
+        'member'          => $this->currentUser,
+        'showUpdateBtn'   => true,
+        'showPasswordBtn' => true,
+        'showEmailBtn' => true,
+    )) ?>
+    
+    <?= $this->partial('submission/pending-list.phtml', array(
+        'showChapter'  => true,
+        'submissions'  => $this->userSubmissions,
+        'sectionTitle' => 'Your Pending Submissions',
+    )) ?>
+
+    <? if ($this->otherSubmissions && count($this->otherSubmissions)): ?>
+        <?= $this->partial('submission/pending-list.phtml', array(
+            'showChapter'  => true,
+            'submissions'  => $this->otherSubmissions,
+            'sectionTitle' => 'Other Pending Submissions',
+        )) ?>
+    <? endif; ?>
+    
+
+    <? if (!count($currentMemberships) && !count($pastMemberships)): ?>
+        <section class="member-details">
+            <h2>Memberships</h2>
+            <em>No membership information found</em>
+        </section>
+    <? else: ?>
+        <section class="member-details">
+            <?= $this->partial('membership/table.phtml', array(
+                'title'       => 'Current Memberships',
+                'memberships' => $currentMemberships,
+                'currentUser' => $this->currentUser,
+            )) ?>
+        </section>
+        <section class="member-details">
+            <?= $this->partial('membership/table.phtml', array(
+                'title'               => 'Past Memberships',
+                'memberships'         => $pastMemberships,
+                'currentUser'         => $this->currentUser,
+                'showAccuracyWarning' => true,
+            )) ?>
+        </section>
+    <? endif; ?>
+    
+    <section class="member-details">
+        <h2>Initiations</h2>
+        <? if (count($member->getInitiations())): ?>
+            <table class="member-initiations member-view-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Chapter</th>
+                        <th>Number</th>
+                        <? if ($this->currentUser->isAllowed('initiation_delete')): ?>
+                            <th></th>
+                        <? endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <? foreach ($member->getInitiations() as $initiation): ?>
+                        <?php
+                        
+                        $chapter = $initiation->getChapter();
+                        
+                        ?>
+                        <tr>
+                            <td><?= $this->date($initiation->getInitiationDate(), 'M j, Y') ?></td>
+                            <td>
+                                <? if ($chapter): ?>
+                                    <?= $this->escape($chapter->getName()) ?>
+                                    <?= $this->orgTag($chapter->getOrganization()) ?>
+                                <? else: ?>
+                                    <span class="na">(n/a)</span>
+                                <? endif; ?>
+                            </td>
+                            <td>
+                                <?= $this->escape($initiation->getInitiationNumber()) ?>
+                                
+                                <? if ($initiation->honorary): ?>
+                                    <em>(Honorary)</em>
+                                <? endif; ?>
+                            </td>
+                            <? if ($this->currentUser->isAllowed('initiation_delete')): ?>
+                                <td><a href="/initiation/delete/id/<?= $this->escape($initiation->getId()) ?>">Delete</a></td>
+                            <? endif; ?>
+                        </tr>
+                    <? endforeach; ?>
+                </tbody>
+            </table>
+        <? else: ?>
+            <em>(No initiations found for this member)</em>
+        <? endif; ?>
+    </section>
+</div>
+

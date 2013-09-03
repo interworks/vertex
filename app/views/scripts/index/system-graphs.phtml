@@ -1,0 +1,173 @@
+<?php
+
+$this->asset()->append(['/vendor/flot/jquery.flot.js']);
+$this->asset()->append(['/vendor/flot/jquery.flot.time.js']);
+
+?>
+<script type="text/javascript">
+
+var nodeColors = <?= $this->json($this->nodeColors) ?>;
+
+</script>
+
+<div class="graph-cpu-container">
+    <div id="graph-cpu" class="graph"></div>
+    <div id="graph-cpu-legend"></div>
+</div>
+<script type="text/javascript">
+
+$(function() {
+    var cpuData = <?= $this->json($this->cpuUsage) ?>;
+    var seriesList = [];
+    var container = $('#graph-cpu');
+
+    for (var nodeName in cpuData) {
+        seriesList.push({
+            label: nodeName,
+            color: nodeColors[nodeName],
+            shadowSize: 0,
+            data: cpuData[nodeName]
+        });
+    }
+
+    $.plot(container, seriesList, {
+        xaxis: { mode: 'time' },
+        yaxis: {
+            min: 0,
+            max: 100
+        },
+        grid: {
+            margin: { left: 22, top: 8 }
+        },
+        legend: { show: false }
+    });
+
+    var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+        .text("CPU Usage (%)")
+        .appendTo(container);
+
+    yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+});
+
+</script>
+
+<div class="graph-mem-container">
+    <div id="graph-mem" class="graph"></div>
+    <div id="graph-mem-legend"></div>
+</div>
+<script type="text/javascript">
+
+$(function() {
+    var memData = <?= $this->json($this->memUsage) ?>;
+    var seriesList = [];
+    var container = $('#graph-mem');
+
+    for (var nodeName in memData) {
+        seriesList.push({
+            label: nodeName,
+            color: nodeColors[nodeName],
+            shadowSize: 0,
+            data: memData[nodeName]
+        });
+    }
+
+    $.plot(container, seriesList, {
+        xaxis: { mode: 'time' },
+        yaxis: {
+            min: 0,
+            max: 100
+        },
+        grid: {
+            margin: { left: 22, top: 8 }
+        },
+        legend: { show: false }
+    });
+
+    var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+        .text("Mem Usage (%)")
+        .appendTo(container);
+
+    yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+});
+
+</script>
+
+<div class="graph-io-container">
+    <div id="graph-io" class="graph"></div>
+    <div id="graph-io-legend"></div>
+</div>
+<script type="text/javascript">
+
+$(function() {
+    var ioData = <?= $this->json($this->ioUsage) ?>;
+    var seriesList = [];
+    var container = $('#graph-io');
+
+    for (var nodeName in ioData) {
+        seriesList.push({
+            label: nodeName,
+            color: nodeColors[nodeName],
+            shadowSize: 0,
+            data: ioData[nodeName]
+        });
+    }
+
+    $.plot(container, seriesList, {
+        xaxis: { mode: 'time' },
+        yaxis: {
+            min: 0
+        },
+        grid: {
+            margin: { left: 22, top: 8 }
+        },
+        legend: { show: false }
+    });
+
+    var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+        .text("IO Usage (KB/s)")
+        .appendTo(container);
+
+    yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+});
+
+</script>
+
+<div class="graph-net-container">
+    <div id="graph-net" class="graph"></div>
+    <div id="graph-net-legend"></div>
+</div>
+<script type="text/javascript">
+
+$(function() {
+    var netData = <?= $this->json($this->netUsage) ?>;
+    var seriesList = [];
+    var container = $('#graph-net');
+
+    for (var nodeName in netData) {
+        seriesList.push({
+            label: nodeName,
+            color: nodeColors[nodeName],
+            shadowSize: 0,
+            data: netData[nodeName]
+        });
+    }
+
+    $.plot(container, seriesList, {
+        xaxis: { mode: 'time' },
+        yaxis: {
+            min: 0
+        },
+        grid: {
+            margin: { left: 22, top: 8 }
+        },
+        legend: { show: false }
+    });
+
+    var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+        .text("Net Transfer (KB/s)")
+        .appendTo(container);
+
+    yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+});
+
+</script>

@@ -1,0 +1,290 @@
+<?php
+
+$this->pageTitle = 'Cluster Status';
+$this->pageSubTitle = $this->dbName;
+
+$this->asset()->append(['/vendor/flot/jquery.flot.js']);
+$this->asset()->append(['/vendor/flot/jquery.flot.time.js']);
+
+$palette = ['#729ece', '#ff9e4a', '#67bf5c', '#ed665d', '#ad8bc9', '#a8786e', '#ed97ca', '#a2a2a2'];
+$currColor = 0;
+$numColors = count($palette);
+$nodeColors = [];
+
+foreach ($this->nodes as &$node) {
+    $node['color'] = $palette[$currColor];
+    $nodeColors[$node['node_name']] = $palette[$currColor];
+    $currColor = ($currColor + 1) % $numColors;
+}
+
+unset($node);
+
+?>
+<ul class="nav nav-pills">
+    <li class="active"><a href="#">Overview</a></li>
+    <li><a href="#">System</a></li>
+    <li><a href="#">Queries</a></li>
+    <li><a href="#">Resource Pools</a></li>
+    <li><a href="#">Storage</a></li>
+</ul>
+<div class="row">
+    <div class="span4">
+        <p>
+            <strong><?= $this->escape($this->version) ?></strong>
+            up for 
+            <span title="<?= $this->date($this->startTime) ?>">
+                <?= $this->timeDiff($this->startTime, ['formatPast' => '%s']) ?>
+            </span>
+        </p>
+        <table class="table table-bordered table-condensed table-striped" id="node-summaryList">
+            <thead>
+                <tr><th>Node</th><th>IP</th><th>State</th><th>Since</th></tr>
+            </thead>
+            <tbody>
+            <? foreach ($this->nodes as $node): ?>
+                <tr>
+                    <td>
+                        <span class="node-color-legendBox" style="background-color: <?= $node['color'] ?>"></span>
+                        <?= $this->escape($node['node_name']) ?>
+                    </td>
+                    <td><?= $this->escape($node['node_address']) ?></td>
+                    <td>
+                        <?php
+
+                        switch ($node['node_state']) {
+                            case 'UP':
+                                echo '<span class="label label-success"><i class="icon-ok icon-white"></i>';
+                                break;
+                            default:
+                                echo '<span class="label label-important"><i class="icon-warning-sign icon-white"></i>';
+                                break;
+                        }
+                        ?>
+                        <?= $this->escape($node['node_state']) ?></span>
+                    </td>
+                    <td>
+                        <span title="<?= $this->date($node['last_state_change']) ?>">
+                            <?= $this->timeDiff($node['last_state_change']) ?>
+                        </span>
+                    </td>
+                </tr>
+            <? endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="span8">
+        <script type="text/javascript">
+
+        var nodeColors = <?= $this->json($nodeColors) ?>;
+
+        </script>
+
+        <div class="graph-cpu-container">
+            <div id="graph-cpu"></div>
+            <div id="graph-cpu-legend"></div>
+        </div>
+        <script type="text/javascript">
+
+        $(function() {
+            var cpuData = <?= $this->json($this->cpuUsage) ?>;
+            var seriesList = [];
+            var container = $('#graph-cpu');
+
+            for (var nodeName in cpuData) {
+                seriesList.push({
+                    label: nodeName,
+                    color: nodeColors[nodeName],
+                    shadowSize: 0,
+                    data: cpuData[nodeName]
+                });
+            }
+
+            $.plot(container, seriesList, {
+                xaxis: { mode: 'time' },
+                yaxis: {
+                    min: 0,
+                    max: 100
+                },
+                grid: {
+                    margin: { left: 22, top: 8 }
+                },
+                legend: { show: false }
+            });
+
+            var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+                .text("CPU Usage (%)")
+                .appendTo(container);
+
+            yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+        });
+
+        </script>
+
+        <div class="graph-mem-container">
+            <div id="graph-mem"></div>
+            <div id="graph-mem-legend"></div>
+        </div>
+        <script type="text/javascript">
+
+        $(function() {
+            var memData = <?= $this->json($this->memUsage) ?>;
+            var seriesList = [];
+            var container = $('#graph-mem');
+
+            for (var nodeName in memData) {
+                seriesList.push({
+                    label: nodeName,
+                    color: nodeColors[nodeName],
+                    shadowSize: 0,
+                    data: memData[nodeName]
+                });
+            }
+
+            $.plot(container, seriesList, {
+                xaxis: { mode: 'time' },
+                yaxis: {
+                    min: 0,
+                    max: 100
+                },
+                grid: {
+                    margin: { left: 22, top: 8 }
+                },
+                legend: { show: false }
+            });
+
+            var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+                .text("Mem Usage (%)")
+                .appendTo(container);
+
+            yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+        });
+
+        </script>
+
+        <div class="graph-io-container">
+            <div id="graph-io"></div>
+            <div id="graph-io-legend"></div>
+        </div>
+        <script type="text/javascript">
+
+        $(function() {
+            var ioData = <?= $this->json($this->ioUsage) ?>;
+            var seriesList = [];
+            var container = $('#graph-io');
+
+            for (var nodeName in ioData) {
+                seriesList.push({
+                    label: nodeName,
+                    color: nodeColors[nodeName],
+                    shadowSize: 0,
+                    data: ioData[nodeName]
+                });
+            }
+
+            $.plot(container, seriesList, {
+                xaxis: { mode: 'time' },
+                yaxis: {
+                    min: 0
+                },
+                grid: {
+                    margin: { left: 22, top: 8 }
+                },
+                legend: { show: false }
+            });
+
+            var yaxisLabel = $('<div class="axisLabel yaxisLabel"></div>')
+                .text("IO Usage (KB/s)")
+                .appendTo(container);
+
+            yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+        });
+
+        </script>
+    </div>
+</div>
+
+<h2>Storage Status</h2>
+
+<table class="table table-bordered table-condensed table-striped">
+    <thead>
+        <tr><th>Node</th><th>Usage</th><th>Status</th><th>Total Size</th><th>Space Used</th></tr>
+    </thead>
+    <tbody>
+    <? foreach ($this->disks as $disk): ?>
+        <tr>
+            <td><?= $this->escape($disk['node_name']) ?></td>
+            <td><?= $this->escape($disk['storage_usage']) ?></td>
+            <td>
+                <?php
+
+                switch ($disk['storage_status']) {
+                    case 'Active':
+                        echo '<span class="label label-success">';
+                        break;
+                    default:
+                        echo '<span class="label label-important">';
+                        break;
+                }
+                ?>
+                <?= $this->escape($disk['storage_status']) ?></span>
+            </td>
+            <td><?= $this->fileSize($disk['disk_block_size_bytes'] * ($disk['disk_space_free_blocks'] + $disk['disk_space_used_blocks'])) ?></td>
+            <td>
+                <?php
+
+                $usedPct = 100.0*$disk['disk_space_used_blocks']/($disk['disk_space_used_blocks']+$disk['disk_space_free_blocks']);
+
+                ?>
+                <div class="storage-amount-progress">
+                    <div class="progress">
+                        <div class="bar" style="width: <?= $usedPct ?>%"></div>
+                    </div>
+                </div>
+                <div class="storage-amount-label">
+                    <?= $this->fileSize($disk['disk_block_size_bytes'] * $disk['disk_space_used_blocks']) ?> <em><?= round($usedPct, 2) ?>%</em>
+                </div>
+            </td>
+        </tr>
+    <? endforeach; ?>
+    </tbody>
+</table>
+
+
+<!-- <h2>Schemas</h2> -->
+
+<? foreach ($this->schemas as $schemaName => $schema): ?>
+    <h3><?= $this->escape($schemaName) ?></h3>
+
+    <table class="table table-bordred table-striped">
+    <thead>
+        <tr><th>Table</th><th>Projections</th></tr>
+    </thead>
+    <tbody>
+    <? foreach ($schema['tables'] as $table): ?>
+        <tr>
+            <td><?= $this->escape($table['table_name']) ?></td>
+            <td>
+                <table class="table table-bordred table-striped">
+                <thead>
+                    <tr><th>Projection</th><th>Properties</th></tr>
+                </thead>
+                <tbody>
+                <? foreach ($table['projections'] as $projection): ?>
+                    <tr>
+                        <td><?= $this->escape($projection['projection_name']) ?></td>
+                        <td>
+                            <?= $this->escape($projection['has_statistics']) ?></td>
+                        </td>
+                    </tr>
+                <? endforeach; ?>
+                </tbody>
+                </table>
+
+            </td>
+        </tr>
+    <? endforeach; ?>
+    </tbody>
+    </table>
+
+<? endforeach; ?>
+</ul>

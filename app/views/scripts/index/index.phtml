@@ -1,0 +1,147 @@
+<?php
+
+$this->pageTitle = 'Cluster Status';
+$this->pageSubTitle = $this->dbName;
+
+$this->asset()->append([
+    '/vendor/jquery.sparkline.min.js',
+]);
+
+$palette = ['#729ece', '#ff9e4a', '#67bf5c', '#ed665d', '#ad8bc9', '#a8786e', '#ed97ca', '#a2a2a2'];
+$currColor = 0;
+$numColors = count($palette);
+$nodeColors = [];
+
+foreach ($this->nodes as &$node) {
+    $node['color'] = $palette[$currColor];
+    $nodeColors[$node['node_name']] = $palette[$currColor];
+    $currColor = ($currColor + 1) % $numColors;
+}
+
+unset($node);
+
+?>
+<script type="text/javascript">
+
+(function ($) {
+    $.fn.vxAlert = function () {
+        return this.addClass('alert alert-info')
+            .append('<button type="button" class="close" data-dismiss="alert">&times;</button>')
+            .detach()
+            .appendTo('#site-alerts-container')
+            .alert();
+    };
+}(jQuery));
+
+$(function () {
+    $('#do-alert').bind({
+        click: function (e) {
+            $('<div><strong>This</strong> is a test!</div>').vxAlert();
+        }
+    });
+});
+
+</script>
+<ul class="nav nav-pills">
+    <li class="active"><a href="/index">Overview</a></li>
+    <li><a href="/index/system">System</a></li>
+    <li><a href="/index/sessions">Sessions</a></li>
+    <li><a href="#">Queries</a></li>
+    <li><a href="#">Resource Pools</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Storage</a></li>
+</ul>
+<div class="row">
+    <div class="span4">
+        <p>
+            <strong><?= $this->escape(str_replace('Analytic Database', '', $this->version)) ?></strong>
+            up for 
+            <span title="<?= $this->date($this->startTime) ?>">
+                <?= $this->timeDiff($this->startTime, ['formatPast' => '%s']) ?>
+            </span>
+        </p>
+        <table class="table table-bordered table-condensed table-striped" id="node-summaryList">
+            <thead>
+                <tr><th>Node</th><th>IP</th><th>State</th><th>CPU</th></tr>
+            </thead>
+            <tbody>
+            <? foreach ($this->nodes as $node): ?>
+                <tr>
+                    <td>
+                        <span class="node-color-legendBox" style="background-color: <?= $node['color'] ?>"></span>
+                        <?= $this->escape($node['node_name']) ?>
+                    </td>
+                    <td><?= $this->escape($node['node_address']) ?></td>
+                    <td>
+                        <?php
+
+                        switch ($node['node_state']) {
+                            case 'UP':
+                                echo '<span class="label label-success"><i class="icon-ok icon-white"></i>';
+                                break;
+                            default:
+                                echo '<span class="label label-important"><i class="icon-warning-sign icon-white"></i>';
+                                break;
+                        }
+                        ?>
+                        <?= $this->escape($node['node_state']) ?></span>
+
+                        <? if ($node['last_state_change']): ?>
+                            <span title="<?= $this->date($node['last_state_change']) ?>">
+                                <em>(<?= $this->timeDiff($node['last_state_change'], ['formatPast' => '%s']) ?>)</em>
+                            </span>
+                        <? endif; ?>
+                    </td>
+                    <td>
+                        <span class="inlinespark">1,5,2,6,7,2,6,10,2,5</span>
+                    </td>
+                </tr>
+            <? endforeach; ?>
+            </tbody>
+        </table>
+
+        <script type="text/javascript">
+
+        $(function () {
+            $('.inlinespark').sparkline('html', {
+                width: '10em',
+                height: '2em'
+            });
+        });
+
+        </script>
+
+        <? if ($this->tasks): ?>
+            <table class="table table-bordered table-condensed table-striped" id="cluster-taskList">
+                <thead>
+                    <tr><th>Task ID</th><th>Started</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                <? foreach ($this->tasks as $task): ?>
+                    <tr>
+                        <td><?= $this->escape($task->getId()) ?></td>
+                        <td>
+                            <? if ($task->getStartTime()): ?>
+                                <?= $this->timeDiff($task->getStartTime()) ?>
+                            <? else: ?>
+                                <span class="muted">(Queued)</span>
+                            <? endif; ?>
+                        </td>
+                        <td><?= $this->escape($task->getDescription()) ?></td>
+                    </tr>
+                <? endforeach; ?>
+                </tbody>
+            </table>
+        <? endif; ?>
+    </div>
+    <div class="span8" id="overview-graphs">
+        <?= $this->partial('index/system-graphs.phtml', [
+            'cpuUsage'   => $this->cpuUsage,
+            'memUsage'   => $this->memUsage,
+            'ioUsage'    => $this->ioUsage,
+            'netUsage'   => $this->netUsage,
+            'nodeColors' => $nodeColors,
+        ]) ?>
+    </div>
+</div>
+</ul>

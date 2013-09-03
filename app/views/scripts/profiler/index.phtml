@@ -1,0 +1,255 @@
+<?php
+
+if ('profile' == $this->action) {
+    $this->pageTitle = 'Profile Query';
+} else {
+    $this->pageTitle = 'Explain Query';
+}
+
+?>
+<form action="/profiler" method="post" id="profiler-form">
+    <fieldset>
+        <textarea type="text" id="profiler-query" name="query" placeholder="SELECT * FROM foo"><?= $this->escape($this->query) ?></textarea>
+        <br />
+        <a href="#" id="profiler-exampleQueryBtn" class="btn btn-small">Load Example Query</a>
+        <label for="profiler-resourcePool">Resource Pool:</label>
+        <select id="profiler-resourcePool" name="profiler-resourcePool">
+            <option>general</option>
+            <option>user</option>
+        </select>
+        <br />
+        <label class="checkbox">
+            <input type="checkbox" name="profile-clearCaches" value="1" />
+            Clear Caches
+        </label>
+        <button type="submit" name="action" value="explain" class="btn"><i class="icon icon-eye-open"></i> Explain Query</button>
+        <button type="submit" name="action" value="profile" class="btn"><i class="icon icon-time"></i> Profile Query</button>
+    </fieldset>
+</form>
+<script type="text/javascript">
+
+$(function () {
+    $('#profiler-exampleQueryBtn').bind({
+        click: function (e) {
+            $('#profiler-query').val(["SELECT DISTINCT s.product_key, p.product_description",
+                "FROM store.store_sales_fact s, public.product_dimension p",
+                "WHERE s.product_key = p.product_key",
+                "AND s.product_version = p.product_version",
+                "AND s.store_key IN (",
+                "    SELECT store_key",
+                "    FROM store.store_dimension",
+                "    WHERE store_state = 'MA'",
+                ")",
+                "ORDER BY s.product_key"
+            ].join("\n"));
+
+            return false;
+        }
+    });
+
+});
+
+</script>
+<? if ($this->query): ?>
+    <pre class="highlight"><code class="sql"><?= $this->escape($this->query) ?></code></pre>
+<? endif; ?>
+<? if ($this->explanation): ?>
+    <?php
+
+    $explanation = $this->escape($this->explanation);
+    // $rep = '<span class="label label-warning">(NO STATISTICS)</span> <button class="btn btn-mini">Analyze Statistics</button>';
+    $rep = '<span class="label label-warning">(NO STATISTICS)</span>';
+    $explanation = preg_replace('/\(NO STATISTICS\)/', $rep, $explanation);
+    $rep = '<span class="label label-important">(BROADCAST)</span>';
+    $explanation = preg_replace('/\(BROADCAST\)/', $rep, $explanation);
+    $rep = '-&gt; <span class="label label-important">JOIN HASH</span>';
+    $explanation = preg_replace('/\-\&gt; JOIN HASH/', $rep, $explanation);
+    $rep = '- <span class="label label-important">GROUPBY HASH</span>';
+    $explanation = preg_replace('/\-\s*GROUPBY HASH/', $rep, $explanation);
+
+    ?>
+    <pre><code><?= $explanation ?></code></pre>
+
+    <? if ($this->dotFile): ?>
+        <img src="/profiler/dot-file/name/<?= $this->escape($this->dotFile) ?>" />
+    <? endif; ?>
+<? endif; ?>
+
+<? if ('profile' == $this->action): ?>
+    <dl class="">
+        <dt>Total Time:</dt>
+        <dd><?= $this->escape(round($this->profileTotals['running_time'], 2)) ?>s</dd>
+        <dt>Total Memory Allocated</dt>
+        <dd><?= $this->fileSize($this->profileTotals['memory_allocated_bytes']) ?></dd>
+        <dt>Processed Row Count</dt>
+        <dd><?= number_format($this->processedRowCount) ?></dd>
+        <dt>Transaction ID</dt>
+        <dd><?= $this->escape($this->transId) ?></dd>
+        <dt>Statement ID</dt>
+        <dd><?= $this->escape($this->stmtId) ?></dd>
+    </dl>
+<? endif; ?>
+
+<? if ($this->planProfile): ?>
+    <h2>Plan Profile</h2>
+
+    <table class="table table-bordered table-condensed table-striped plan-profile-table">
+        <thead>
+            <tr><th>Path Line</th><th>Time</th><th>Memory</th><th>Disk</th><th>Cache</th><th>Network</th></tr>
+        </thead>
+        <tbody>
+        <? foreach ($this->planProfile as $line): ?>
+            <tr>
+                <td class="plan-profile-line">
+                    <? if (-1 == $line['path_id']): ?>
+                        <em>(Base)</em>
+                    <? else: ?>
+                        <?php
+
+                        $explanation = $this->escape(implode("\n", $line['path_lines']));
+                        $rep = '<span class="label label-warning">(NO STATISTICS)</span>';
+                        $explanation = preg_replace('/\(NO STATISTICS\)/', $rep, $explanation);
+                        $rep = '<span class="label label-important">(BROADCAST)</span>';
+                        $explanation = preg_replace('/\(BROADCAST\)/', $rep, $explanation);
+                        $rep = '-&gt; <span class="label label-important">JOIN HASH</span>';
+                        $explanation = preg_replace('/\-\&gt; JOIN HASH/', $rep, $explanation);
+                        $rep = '- <span class="label label-important">GROUPBY HASH</span>';
+                        $explanation = preg_replace('/\-\s*GROUPBY HASH/', $rep, $explanation);
+
+                        ?>
+
+                        <pre><code><?= $explanation ?></code></pre>
+                    <? endif; ?>
+                </td>
+                <td>
+                    <div class="profiler-pathValue-progress">
+                        <div class="progress" title="<?= round($line['running_time']/$this->profileTotals['running_time']*100, 2) ?>%">
+                            <div class="bar" style="width: <?= $line['running_time']/$this->profileTotals['running_time']*100 ?>%"></div>
+                        </div>
+                    </div>
+                    <div class="profiler-pathValue-label">
+                        <?= $this->escape($line['running_time']) ?>s
+                    </div>
+                </td>
+                <td>
+                    <div class="profiler-pathValue-progress">
+                        <div class="progress">
+                            <div class="bar" style="width: <?= $line['memory_allocated_bytes']/$this->profileTotals['memory_allocated_bytes']*100 ?>%"></div>
+                        </div>
+                    </div>
+                    <div class="profiler-pathValue-label" title="<?= round($line['memory_allocated_bytes']/$this->profileTotals['memory_allocated_bytes']*100, 2) ?>%">
+                            <? if ($line['memory_allocated_bytes']): ?>
+                                <?= $this->fileSize($line['memory_allocated_bytes']) ?>
+                            <? else: ?>
+                                <span class="none">None</span>
+                            <? endif; ?>
+                    </div>
+                </td>
+                <td>
+                    <? if (0 == $this->profileTotals['read_from_disk_bytes']): ?>
+                        <span class="none">None</span>
+                    <? else: ?>
+                        <div class="profiler-pathValue-progress">
+                            <div class="progress">
+                                <div class="bar" style="width: <?= $line['read_from_disk_bytes']/$this->profileTotals['read_from_disk_bytes']*100 ?>%"></div>
+                            </div>
+                        </div>
+                        <div class="profiler-pathValue-label" title="<?= round($line['read_from_disk_bytes']/$this->profileTotals['read_from_disk_bytes']*100, 2) ?>%">
+                            <? if ($line['read_from_disk_bytes']): ?>
+                                <?= $this->fileSize($line['read_from_disk_bytes']) ?>
+                            <? else: ?>
+                                <span class="none">None</span>
+                            <? endif; ?>
+                        </div>
+                    <? endif; ?>
+                </td>
+                <td>
+                    <? if (0 == $this->profileTotals['read_from_cache_bytes']): ?>
+                        <span class="none">None</span>
+                    <? else: ?>
+                        <div class="profiler-pathValue-progress">
+                            <div class="progress">
+                                <div class="bar" style="width: <?= $line['read_from_cache_bytes']/$this->profileTotals['read_from_cache_bytes']*100 ?>%"></div>
+                            </div>
+                        </div>
+                        <div class="profiler-pathValue-label" title="<?= round($line['read_from_cache_bytes']/$this->profileTotals['read_from_cache_bytes']*100, 2) ?>%">
+                            <? if ($line['read_from_cache_bytes']): ?>
+                                <?= $this->fileSize($line['read_from_cache_bytes']) ?>
+                            <? else: ?>
+                                <span class="none">None</span>
+                            <? endif; ?>
+                        </div>
+                    <? endif; ?>
+                </td>
+                <td>
+                    <? if (0 == $this->profileTotals['network_bytes']): ?>
+                        <span class="none">None</span>
+                    <? else: ?>
+                        <div class="profiler-pathValue-progress">
+                            <div class="progress">
+                                <div class="bar" style="width: <?= $line['network_bytes']/$this->profileTotals['network_bytes']*100 ?>%"></div>
+                            </div>
+                        </div>
+                        <div class="profiler-pathValue-label" title="<?= round($line['network_bytes']/$this->profileTotals['network_bytes']*100, 2) ?>%">
+                            <? if ($line['network_bytes']): ?>
+                                <?= $this->fileSize($line['network_bytes']) ?>
+                            <? else: ?>
+                                <span class="none">None</span>
+                            <? endif; ?>
+                        </div>
+                    <? endif; ?>
+                </td>
+            </tr>
+        <? endforeach; ?>
+        </tbody>
+    </table>
+
+    <button class="btn">Download All Profile Data</button>
+<? endif; ?>
+
+<? if ($this->projections): ?>
+    <h2>Projections Used</h2>
+
+    <table class="table table-bordered table-condensed table-striped">
+        <thead>
+            <tr><th>Table</th><th>Projection</th><th>Create Type</th><th>Type</th><th>Has Statistics</th></tr>
+        </thead>
+        <tbody>
+        <? foreach ($this->projections as $projection): ?>
+            <tr>
+                <td><?= $this->escape($projection['anchor_table_name']) ?></td>
+                <td><?= $this->escape($projection['projection_name']) ?></td>
+                <td><?= $this->escape($projection['create_type']) ?></td>
+                <td><?= $this->escape($projection['is_segmented']) ? 'SEGMENTED' : 'REPLICATED' ?></td>
+                <td><?= $this->escape($projection['has_statistics']) ? 'Yes' : '<span class="label label-important">MISSING</span>' ?></td>
+            </tr>
+        <? endforeach; ?>
+        </tbody>
+    </table>
+
+<? endif; ?>
+
+<? if ($this->queryEvents): ?>
+    <h2>Query Events</h2>
+
+    <table class="table table-bordered table-condensed table-striped">
+        <thead>
+            <tr><th>Timestamp</th><th>Category</th><th>Type</th><th>Description</th><th>Suggested Action</th></tr>
+        </thead>
+        <tbody>
+        <? foreach ($this->queryEvents as $event): ?>
+            <tr>
+                <td><?= $this->escape($event['event_timestamp']) ?></td>
+                <td><?= $this->escape($event['event_category']) ?></td>
+                <td><?= $this->escape($event['event_type']) ?></td>
+                <td><?= $this->escape($event['event_description']) ?></td>
+                <td><?= $this->escape($event['suggested_action']) ?></td>
+            </tr>
+        <? endforeach; ?>
+        </tbody>
+    </table>
+
+<? endif; ?>
+
+
+

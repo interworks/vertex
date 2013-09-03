@@ -1,0 +1,212 @@
+body {
+    padding-top: 60px;
+}
+#site-footer {
+    background: #eaeaea;
+    overflow: hidden;
+    margin-top: 20px;
+}
+#site-logo {
+    display: block;
+    height: 20px;
+    width: 84px;
+    background: transparent url('/images/logos/logo-light-20px.png') no-repeat;
+    background-size: 84px 20px;
+}
+/*.navbar .nav > li > a {
+    padding: 15px 15px 15px;
+}
+*/
+.none {
+    color: #bbb;
+    font-style: italic;
+    font-size: 0.9em;
+}
+#params-table,
+#dc-params-table {
+    font-size: 0.9em;
+}
+th.params-description {
+    width: 400px;
+}
+#interworks-footer-logo {
+    width: 1170px;
+    overflow: hidden;
+    margin: auto;
+    padding: 10px 0;
+}
+#interworks-footer-logo img {
+    float: right;
+}
+#profiler-query {
+    width: 60em;
+    height: 5em;
+    font-family: menlo, monaco, consolas, fixed;
+}
+.profiler-pathValue-progress {
+    width: 80px;
+}
+.profiler-pathValue-progress .progress {
+    margin-bottom: 0.5em;
+}
+.storage-amount-progress {
+    width: 200px;
+    float: left;
+}
+.profiler-pathValue-label {
+    font-size: 0.85em;
+}
+.storage-amount-label {
+    float: left;
+    margin-left: 0.5em;
+}
+.plan-profile-table .plan-profile-line pre code {
+    font-size: 10px;
+    line-height: 10px;
+}
+.plan-profile-table .plan-profile-line pre {
+    width: 600px;
+}
+.plan-profile-line .label {
+    font-size: 0.95em;
+}
+#node-summaryList,
+#cluster-taskList {
+    font-size: 0.85em;
+}
+.node-color-legendBox {
+    width: 1em;
+    height: 1em;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    margin-right: 0.5em;
+    display: block;
+    float: left;
+}
+#overview-graphs .graph {
+    width: 100%;
+    height: 150px;
+}
+.axisLabel {
+    position: absolute;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+}
+.yaxisLabel {
+    top: 50%;
+    left: 2px;
+    transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -webkit-transform:  rotate(-90deg);
+    transform-origin: 0 0;
+    -o-transform-origin: 0 0;
+    -ms-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -webkit-transform-origin: 0 0;
+}
+.ie7 .yaxisLabel, .ie8 .yaxisLabel {
+    top: 40%;
+    font-size: 36px;
+    filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.0, M12=0.33, M21=-0.33, M22=0.0,sizingMethod='auto expand');
+}
+
+pre.highlight .keyword,
+pre.highlight .tag,
+pre.highlight .django .tag,
+pre.highlight .django .keyword,
+pre.highlight .css .class,
+pre.highlight .css .id,
+pre.highlight .lisp .title {
+    color: #E3CEAB;
+    color: rgb(251,205,85);
+    color: #55909f;
+}
+
+pre.highlight .number,
+pre.highlight .date {
+    color: #a00;
+}
+
+pre.highlight .dos .envvar,
+pre.highlight .dos .stream,
+pre.highlight .variable,
+pre.highlight .apache .sqbracket {
+    color: #ca8040;
+}
+
+pre.highlight .dos .flow,
+pre.highlight .diff .change,
+pre.highlight .python .exception,
+pre.highlight .python .built_in,
+pre.highlight .literal {
+    color: blue;
+}
+
+pre.highlight .diff .chunk,
+pre.highlight .ruby .subst {
+    color: #8F8F8F;
+}
+
+pre.highlight .dos .keyword,
+pre.highlight .python .decorator,
+pre.highlight .class .title,
+pre.highlight .function .title,
+pre.highlight .ini .title,
+pre.highlight .diff .header,
+pre.highlight .ruby .class .parent,
+pre.highlight .apache .tag {
+    color: #f40;
+}
+
+pre.highlight .dos .winutils,
+pre.highlight .ruby .symbol,
+pre.highlight .ruby .string,
+pre.highlight .ruby .instancevar {
+  color: #DCA3A3;
+}
+
+pre.highlight .pre.highlightprocessor {
+    color: #900;
+}
+
+pre.highlight .diff .deletion,
+pre.highlight .string,
+pre.highlight .tag .attribute .value,
+pre.highlight .built_in,
+pre.highlight .sql .aggregate,
+pre.highlight .javadoc,
+pre.highlight .smalltalk .class,
+pre.highlight .smalltalk .localvars,
+pre.highlight .smalltalk .array,
+pre.highlight .css .rules .value,
+pre.highlight .attr_selector,
+pre.highlight .pseudo,
+pre.highlight .apache .cbracket {
+    color: #3b0;
+}
+
+pre.highlight .shebang,
+pre.highlight .diff .addition,
+pre.highlight .comment,
+pre.highlight .java .annotation,
+pre.highlight .template_comment,
+pre.highlight .pi,
+pre.highlight .doctype {
+    color: #999;
+    font-style: italic;
+}
+
+pre.highlight .comment a {
+    color: rgb(140,160,180);
+}
+
+@media
+(-webkit-min-device-pixel-ratio: 2), 
+(min-resolution: 192dpi) { 
+    #site-logo {
+        background-image: url('/images/logos/logo-light-40px.png');
+    }
+}

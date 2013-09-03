@@ -1,0 +1,4 @@
+app/var/db.sq3
+.DS_Store
+app/config/bootstrap/vertica-config.php
+app/config/bootstrap/db-config.php

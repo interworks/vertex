@@ -1,0 +1,38 @@
+<?php
+
+$this->pageTitle = 'Sessions';
+$this->pageSubTitle = $this->dbName;
+
+?>
+<ul class="nav nav-pills">
+    <li><a href="/index">Overview</a></li>
+    <li><a href="/index/system">System</a></li>
+    <li class="active"><a href="/index/sessions">Sessions</a></li>
+    <li><a href="#">Queries</a></li>
+    <li><a href="#">Resource Pools</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Storage</a></li>
+</ul>
+<table class="table table-bordred table-striped">
+<thead>
+    <tr><th>Node</th><th>User</th><th>Host</th><th>Statement Start</th><th>Current Statement</th><th>Last Statement</th><th>Actions</th></tr>
+</thead>
+<tbody>
+<? foreach ($this->sessions as $row): ?>
+    <tr>
+        <td><?= $this->escape($row['node_name']) ?></td>
+        <td><?= $this->escape($row['user_name']) ?></td>
+        <td><?= $this->escape($row['client_hostname']) ?></td>
+        <td><?= $this->timeDiff($row['statement_start']) ?></td>
+        <td>
+            <? if ($row['current_statement']): ?>
+                <?= $this->escape($row['current_statement']) ?>
+            <? else: ?>
+                <span class="none">(None)</span>
+            <? endif; ?>
+        <td><?= $this->escape($row['last_statement'] ?: '(None)') ?></td>
+        <td><a href="#" class="btn btn-small">Close</a></td>
+    </tr>
+<? endforeach; ?>
+</tbody>
+</table>

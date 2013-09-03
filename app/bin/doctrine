@@ -1,0 +1,59 @@
+#!/usr/bin/env php
+<?php
+/**
+ *  o      |                              |         
+ *  .,---.-|-- ,---.,---..     .,---.,---.|,--,---.
+ *  ||   | |   |---'|    |  |  || o ||    |   `---.
+ *  ``   ' `-- `--  `    `--'--'`---'`    '`--`---'
+ * 
+ * @copyright   Copyright 2011, InterWorks, Inc.
+ * @license     Proprietary/Closed
+ * @author      Josh Varner <josh.varner@interworks.com>
+ */
+
+namespace app\bin;
+
+use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use Symfony\Component\Console\Helper\HelperSet;
+use vox\core\Registry;
+use Exception;
+
+class Doctrine {
+    public static function run() {
+        $baseDir = dirname(dirname(__DIR__));
+        $j = function () { return join(DIRECTORY_SEPARATOR, func_get_args()); };
+        $bootstrapPath = $j($baseDir, 'app','config','bootstrap.php');
+        $helperSet = null;
+
+        if (!file_exists($bootstrapPath)) {
+            $baseDir = trim(`git rev-parse --show-toplevel 2>/dev/null`);
+            $bootstrapPath = $j($baseDir, 'app','config','bootstrap.php');
+
+            if (!file_exists($bootstrapPath)) {
+                $baseDir = false;
+                $bootstrapPath = false;
+            }
+        }
+
+        if (empty($bootstrapPath)) {
+            throw new Exception('Unable to determine path to app bootstrap');
+        }
+
+        require $bootstrapPath;
+
+        $helperSet = new HelperSet();
+
+        if (!empty($bootstrapPath)) {
+            if ($em = Registry::get('doctrineEm', false)) {
+                $helperSet->set(new ConnectionHelper($em->getConnection()), 'db');
+                $helperSet->set(new EntityManagerHelper($em), 'em');
+            }
+        }
+
+        ConsoleRunner::run($helperSet);
+    }
+}
+
+Doctrine::run();

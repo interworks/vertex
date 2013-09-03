@@ -1,0 +1,41 @@
+<?php
+
+$this->pageTitle = 'Cluster Configuration';
+
+?>
+<ul class="nav nav-pills">
+    <li class="active">
+        <a href="/admin">Configuration Parameters</a>
+    </li>
+    <li><a href="/admin/data-collector">Data Collector</a></li>
+<!--     <li><a href="/admin/elastic-cluster">Elastic Cluster</a></li>
+ --></ul>
+<table class="table table-bordered table-condensed table-striped" id="params-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Last Changed</th><th class="params-description">Description</th></tr>
+    </thead>
+    <tbody>
+    <? foreach ($this->configParameters as $param): ?>
+        <tr>
+            <td>
+                <span class="vertica-param-name"><?= $this->escape($param['parameter_name']) ?></span>
+            </td>
+            <td>
+                <? if ($param['parameter_name'] == 'SnmpTrapEvents'): ?>
+                    <nobr><?= implode('</nobr><br /><nobr>', explode(',', $this->escape($param['current_value']))) ?></nobr>
+                <? else: ?>
+                    <?= $this->escape($param['current_value']) ?>
+                <? endif; ?>
+            </td>
+            <td>
+                <? if ($param['last_changed']): ?>
+                    <?= $this->timeDiff($param['last_changed']) ?> by <?= $this->escape($param['last_changed_by']) ?>
+                <? else: ?>
+                    <em class="muted">(n/a)</em>
+                <? endif; ?>
+            </td>
+            <td><p class="muted"><?= $this->escape($param['description']) ?></p></td>
+        </tr>
+    <? endforeach; ?>
+    </tbody>
+</table>

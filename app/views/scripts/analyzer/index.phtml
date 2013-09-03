@@ -1,0 +1,41 @@
+<?php
+
+$this->pageTitle = 'Workload Analyzer';
+
+?>
+<table class="table table-bordered table-condensed table-striped">
+    <thead>
+        <tr><th>Observation Count</th><th>Last Observed</th><th>Description</th><th>Remedy</th><th>Cost</th></tr>
+    </thead>
+    <tbody>
+    <? foreach ($this->recommendations as $row): ?>
+        <tr>
+            <td><?= $this->escape($row['observation_count']) ?></td>
+            <td><?= $this->escape($row['last_observation_time']) ?></td>
+            <td><?= $this->escape(ucfirst($row['tuning_description'])) ?></td>
+            <td>
+                <? if ($row['tuning_command']): ?>
+                    <?= $this->escape($row['tuning_command']) ?>
+                    <button type="button" class="btn btn-small">Execute</button>
+                <? endif; ?>
+            </td>
+            <td>
+                <?php
+
+                switch ($row['tuning_cost']) {
+                    case 'HIGH':
+                        echo '<span class="label label-important">HIGH</span>';
+                        break;
+                    case 'MEDIUM':
+                        echo '<span class="label label-warning">MEDIUM</span>';
+                        break;
+                    default:
+                        echo '<span class="label label-info">LOW</span>';
+                        break;
+                }
+                ?>
+            </td>
+        </tr>
+    <? endforeach; ?>
+    </tbody>
+</table>

@@ -1,0 +1,44 @@
+<?php
+
+$this->pageTitle = 'Queries';
+$this->pageSubTitle = $this->dbName;
+
+?>
+<ul class="nav nav-pills">
+    <li><a href="/index">Overview</a></li>
+    <li class="active"><a href="/index/system">System</a></li>
+    <li><a href="#">Sessions</a></li>
+    <li><a href="#">Queries</a></li>
+    <li><a href="#">Resource Pools</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Storage</a></li>
+</ul>
+<div class="row">
+    <div class="span2">
+        <table class="table table-bordered table-condensed table-striped" id="node-summaryList">
+            <thead>
+                <tr><th>Node</th></tr>
+            </thead>
+            <tbody>
+            <? foreach ($this->nodes as $node): ?>
+                <tr>
+                    <td>
+                        <span class="node-color-legendBox" style="background-color: <?= $node['color'] ?>"></span>
+                        <?= $this->escape($node['node_name']) ?>
+                    </td>
+                </tr>
+            <? endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="span8" id="overview-graphs">
+        <?= $this->partial('index/system-graphs.phtml', [
+            'cpuUsage'   => $this->cpuUsage,
+            'memUsage'   => $this->memUsage,
+            'ioUsage'    => $this->ioUsage,
+            'netUsage'   => $this->netUsage,
+            'nodeColors' => $nodeColors,
+        ]) ?>
+    </div>
+</div>
+</ul>

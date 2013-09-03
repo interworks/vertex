@@ -1,0 +1,21 @@
+<?php
+
+$this->pageTitle = 'Log In';
+
+?>
+
+<?= $this->form ?>
+
+<p><a href="/auth/reset-password">Forgot your password?</a></p>
+
+<script type="text/javascript">
+
+(function () {
+
+vox.support.fix('autofocus placeholder');
+
+$('#loginBtn').button({ icons: { primary: 'ui-icon-key' } });
+
+}());
+
+</script>

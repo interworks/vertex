@@ -1,0 +1,33 @@
+<?php
+
+$this->pageTitle = 'Data Collector';
+
+?>
+<ul class="nav nav-pills">
+    <li><a href="/admin">Configuration Parameters</a></li>
+    <li class="active"><a href="/admin/data-collector">Data Collector</a></li>
+</ul>
+<table class="table table-bordered table-condensed table-striped" id="dc-params-table">
+    <thead>
+        <tr><th>Component</th><th>Memory</th><th>Disk</th><th>Current Range</th><th class="params-description">Description</th></tr>
+    </thead>
+    <tbody>
+    <? foreach ($this->components as $component): ?>
+        <tr>
+            <td><?= $this->escape($component['component']) ?></td>
+            <td><?= $this->fileSize($component['memory_buffer_size_kb']*1024) ?></td>
+            <td><?= $this->fileSize($component['disk_size_kb']*1024) ?></td>
+            <td>
+                <? if ($component['first_time'] && $component['last_time']): ?>
+                    <?= $this->timeDiff($component['first_time'], [
+                        'endTime'    => $component['last_time'],
+                        'formatPast' => '%s',
+                    ]) ?></td>
+                <? else: ?>
+                    <span class="none">(No data)</span>
+                <? endif; ?>
+            <td><p class="muted"><?= $this->escape($component['description']) ?></p></td>
+        </tr>
+    <? endforeach; ?>
+    </tbody>
+</table>

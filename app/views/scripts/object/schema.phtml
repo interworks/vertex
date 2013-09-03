@@ -1,0 +1,59 @@
+<?php
+
+$this->pageTitle = 'Schema';
+$this->pageSubTitle = $this->schema;
+
+?>
+<h2>Tables</h2>
+<table class="table table-bordred table-striped">
+<thead>
+    <tr><th>Table</th><th>Owner</th><th>Created</th><th>Projections</th><th>Actions</th></tr>
+</thead>
+<tbody>
+<? foreach ($this->tables as $table): ?>
+    <tr>
+        <td>
+            <a href="/object/table/<?= $this->escape($table['table_schema'] . '/' . $table['table_name']) ?>">
+                <?= $this->escape($table['table_name']) ?>
+            </a>
+        </td>
+        <td><?= $this->escape($table['owner_name']) ?></td>
+        <td>
+            <?= $this->date($table['create_time']) ?>
+            <em>(<?= $this->timeDiff($table['create_time']) ?>)</em>
+        </td>
+        <td><?= $this->escape($table['num_projections']) ?></td>
+        <td><a href="/object/schema/<?= $this->escape($table['schema_name']) ?>/export" class="btn btn-small">Export DDLs</a></td>
+    </tr>
+<? endforeach; ?>
+</tbody>
+</table>
+
+<h2>Views</h2>
+
+<? if ($this->views): ?>
+    <table class="table table-bordred table-striped">
+    <thead>
+        <tr><th>View</th><th>Owner</th><th>Created</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+    <? foreach ($this->views as $table): ?>
+        <tr>
+            <td>
+                <a href="/object/schema/<?= $this->escape($table['table_name']) ?>">
+                    <?= $this->escape($table['table_name']) ?>
+                </a>
+            </td>
+            <td><?= $this->escape($table['owner_name']) ?></td>
+            <td>
+                <?= $this->date($table['create_time']) ?>
+                <em>(<?= $this->timeDiff($table['create_time']) ?>)</em>
+            </td>
+            <td><a href="/object/schema/<?= $this->escape($table['schema_name']) ?>/export" class="btn btn-small">Export DDLs</a></td>
+        </tr>
+    <? endforeach; ?>
+    </tbody>
+    </table>
+<? else: ?>
+    <span class="none">(No views defined)</span>
+<? endif; ?>

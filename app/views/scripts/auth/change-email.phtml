@@ -1,0 +1,18 @@
+<?php
+
+$this->pageTitle = 'Change Email';
+
+?>
+<div id="change-password-page">
+    <p>Please complete the following form to change your email.</p>
+    <p>This will be your new login email as well.</p>
+    <?= $this->form ?>
+</div>
+<script type="text/javascript">
+$(function () {
+    $('#details-password').focus();
+
+    $('#submitBtn').button({ icons: { primary: 'ui-icon-mail-closed' }});
+    $('#form-link-cancelBtn').button({ icons: { primary: 'ui-icon-close' }});
+});
+</script>

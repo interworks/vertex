@@ -1,0 +1,26 @@
+<?php
+
+$this->pageTitle = 'Error';
+
+?>
+<section class="site-section" id="section-top">
+    <div class="site-section-contents">
+        <p>We're sorry, but an unrecoverable error was encountered while processing your request.</p>
+        <p><em><?= $this->escape($this->message) ?></em></p>
+        
+        <? if (isset($this->exception)): ?>
+            <h2><?= $this->escape(get_class($this->exception)) ?></h2>
+            <p>
+                <b>Message:</b> <?= $this->escape($this->exception->getMessage()) ?>
+            </p>
+
+            <h2>Stack trace:</h2>
+            <pre style="overflow:auto;"><?= $this->escape($this->exception->getTraceAsString()) ?>
+            </pre>
+
+            <h2>Request Parameters:</h2>
+            <pre><?= $this->escape(print_r($this->request->getParams(), true)) ?>
+            </pre>
+        <? endif; ?>
+    </div>
+</section>

@@ -1,0 +1,24 @@
+<?php
+
+$this->pageTitle = 'Table';
+$this->pageSubTitle = $this->schema . '.' . $this->table;
+
+?>
+<h2>Projections</h2>
+<table class="table table-bordred table-striped">
+<thead>
+    <tr><th>Projections</th><th>Type</th><th>Create Type</th><th>Owner</th><th>Statistics</th><th>Actions</th></tr>
+</thead>
+<tbody>
+<? foreach ($this->projections as $p): ?>
+    <tr>
+        <td><?= $this->escape($p['projection_name']) ?></td>
+        <td><?= ($p['is_segmented'] == '1' ? '<span class="label label-info">Segmented</span>' : '<span class="label">Replicated</span>') ?></td>
+        <td><?= $this->escape(ucwords(strtolower($p['create_type']))) ?></td>
+        <td><?= $this->escape($p['owner_name']) ?></td>
+        <td><?= ($p['has_statistics'] == '1' ? '<span class="label">Yes</span>' : '<span class="label label-important">Missing</span>') ?></td>
+        <td><a href="/object/schema/<?= $this->escape($p['projection_schema']) ?>/export" class="btn btn-small">Export DDLs</a></td>
+    </tr>
+<? endforeach; ?>
+</tbody>
+</table>

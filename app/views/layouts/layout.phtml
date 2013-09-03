@@ -1,0 +1,111 @@
+<?php
+
+use vox\core\Environment;
+use vox\util\Inflector;
+use vox\core\Registry;
+use app\Application;
+
+if (!empty($this->pageTitle)) {
+    $titleClass = 'page-' . strtolower(Inflector::slug($this->pageTitle));
+    $this->bodyClass = $titleClass . (!empty($this->bodyClass) ? " {$this->bodyClass}" : '');
+} else if (!isset($this->bodyClass)) {
+    $this->bodyClass = '';
+}
+
+if (!empty($this->additionalClass)) {
+    $this->bodyClass .= ' '.strtolower(Inflector::slug($this->additionalClass));
+}
+
+?>
+<?= $this->doctype('HTML5'); ?>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <?php
+
+    $this->asset()
+        ->prepend([
+            '/vendor/jquery/jquery.js',
+            '/vendor/bootstrap/js/bootstrap.js',
+            '/vox/js/support.js',
+            '/vox/js/core.js',
+            '/vendor/highlight.js/highlight.pack.js',
+        ])
+        ->prepend([
+            '/vendor/bootstrap/css/bootstrap.css',
+            '/vendor/bootstrap/css/bootstrap-responsive.css',
+            '/css/main.css',
+        ])
+        ->generate();
+
+    echo trim(str_replace("\n", "\n    ", implode("\n", array_filter([
+        $this->title([$this->pageTitle, 'Vertex']),
+        $this->headLink(),
+        $this->headScript(),
+        $this->headMeta(),
+    ]))));
+
+    ?>
+
+    <!--[if lt IE 9]>
+        <script src="/vendor/html5shim.js" type="text/javascript" charset="utf-8"></script>
+    <![endif]-->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/favicons/144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/favicons/114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/favicons/72.png" />
+    <link rel="apple-touch-icon-precomposed" href="/images/favicons/57.png" />
+    <link rel="shortcut icon" href="/images/favicons/32.png" />
+    <script type="text/javascript">
+    
+    (function () {
+        vox.support.fix('autofocus placeholder');
+    }());
+
+    </script>
+</head>
+<body class="<?= (trim($this->bodyClass) ?: 'vertex-main') ?>">
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="/"><span id="site-logo"></span></a>
+                <?= $this->navigation()->menu() ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title"><?= $this->escape($this->pageTitle) . ($this->pageSubTitle ? ' <small>' . $this->pageSubTitle . '</small>' : '') ?></h1>
+
+        <? if (!$this->customErrorOutput): ?>
+            <?= $this->errors() ?>
+        <? endif; ?>
+
+        <div id="site-alerts-container"></div>
+
+        <?= $this->layout()->content ?>
+    </div>
+    <footer id="site-footer">
+        <? if (false && Registry::get('debug')->showStatsInFooter): ?>
+<pre>
+Time: <?= sprintf('%0.2f', Application::getInstance()->getTimeSince()) ?> second(s)
+Memory (peak): <?= $this->fileSize(memory_get_peak_usage(true)) ?> bytes
+Files: <?= number_format(count(get_included_files()), 0) ?> included
+Session: <?= (Zend_Session::isStarted() ? Zend_Session::getId() : '<em>none</em>') ?>
+</pre>
+
+        <? endif; ?>
+        <div id="interworks-footer-logo"><img src="/images/interworks.png" width="130" height="37" alt="InterWorks, Inc." /></div>
+    </footer>
+<?= $this->inlineScript() ?>
+<script type="text/javascript">
+
+$(function () {
+    $('pre.highlight code').each(function(i, e) { hljs.highlightBlock(e) });
+});
+
+</script>
+</body>
+</html>

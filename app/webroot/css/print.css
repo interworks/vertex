@@ -1,0 +1,73 @@
+:root{-webkit-print-color-adjust:exact} 
+ 
+#add-comment-form,
+#site-header #site-menu,
+#logged-in-box,
+#search-form-container,
+#submission-actions,
+.submission-status-notice,
+header {
+    display: none;
+}
+#site-footer {
+    text-shadow: none;
+    display: none;
+}
+#page {
+    margin: 0;
+    padding: 0;
+    background-color: #FFF;
+    float:none;
+}
+#search-results-container,
+#search-results {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    float:none;
+}
+#search-resultsTable {
+    float:none;
+}
+#search-resultsTable table{
+    padding: 0;
+    width: 100%;
+    page-break-after: always;
+}
+    #search-resultsTable table tr:nth-child(even){
+        background-color: #e8e8e8;
+    }
+    #search-resultsTable table td{
+        padding: 5px;
+    }
+
+p {
+    margin: 0;
+    padding: 0;
+}
+.signature-line {
+    display: block;
+    margin-top: 10px;
+}
+.signature-line dd {
+    width: 300px;
+    height: 15px;
+    border-bottom: 1px solid #000;
+}
+.hazing-policy-notice {
+    display: block;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.honorary-initiation .hazing-policy-notice,
+.honorary-initiation .signature-line {
+    display: none;
+}
+#submission-view fieldset#submission-section-members, 
+#submission-view fieldset#submission-section-info,
+#submission-view fieldset {
+    width: 95%;
+}
+.submission-section {
+    background-color: #FFF;
+}

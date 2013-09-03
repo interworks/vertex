@@ -1,0 +1,145 @@
+#!/usr/bin/env php
+<?php
+/**
+ *  o      |                              |         
+ *  .,---.-|-- ,---.,---..     .,---.,---.|,--,---.
+ *  ||   | |   |---'|    |  |  || o ||    |   `---.
+ *  ``   ' `-- `--  `    `--'--'`---'`    '`--`---'
+ * 
+ * @copyright   Copyright 2011, InterWorks, Inc.
+ * @license     Proprietary/Closed
+ * @author      Josh Varner <josh.varner@interworks.com>
+ */
+
+namespace app\bin;
+
+use app\models\SchemaInfo;
+use vox\core\Registry;
+use DirectoryIterator;
+use Exception;
+
+class DbMigrate {
+    protected static function _bootstrap() {
+        $baseDir = dirname(dirname(__DIR__));
+        $j = function () { return join(DIRECTORY_SEPARATOR, func_get_args()); };
+        $bootstrapPath = $j($baseDir, 'app','config','bootstrap.php');
+        $helperSet = null;
+
+        if (!file_exists($bootstrapPath)) {
+            $baseDir = trim(`git rev-parse --show-toplevel 2>/dev/null`);
+            $bootstrapPath = $j($baseDir, 'app','config','bootstrap.php');
+
+            if (!file_exists($bootstrapPath)) {
+                $baseDir = false;
+                $bootstrapPath = false;
+            }
+        }
+
+        if (empty($bootstrapPath)) {
+            throw new Exception('Unable to determine path to app bootstrap');
+        }
+
+        require $bootstrapPath;
+    }
+
+    public static function run() {
+        global $argv, $argc;
+
+        static::_bootstrap();
+
+        $em = Registry::get('doctrineEm');
+        $conn = $em->getConnection();
+
+        $currentVersion = SchemaInfo::getVersion();
+        echo "          Database: " . $conn->getDatabase() . "\n";
+        echo "              Host: " . $conn->getHost() . "\n";
+        echo "              Port: " . $conn->getPort() . "\n";
+        echo "              User: " . $conn->getUsername() . "\n";
+        echo "   Current version: {$currentVersion}\n";
+
+        $dir = new DirectoryIterator(APPLICATION_PATH . '/migrations');
+        $migrations = array();
+
+        $revert = false;
+
+        if (isset($argv[2]) && 'revert' === $argv[2]) {
+            echo "Revert mode\n";
+            $revert = true;
+        }
+
+        foreach ($dir as $file) {
+            if ($file->isDot()) {
+                continue;
+            } else if ('php' !== $file->getExtension()) {
+                continue;
+            }
+            
+            $basename = $file->getBasename('.php');
+            $base = explode('-', $basename, 2);
+            $version = (int) $base[0];
+            
+            if ($revert && $version > $currentVersion) {
+                continue;
+            } else if (!$revert && $version <= $currentVersion) {
+                continue;
+            }
+            
+            $desc = @$base[1] ?: '';
+            $filename = $file->getRealPath();
+            $migrations[$version] = compact('filename', 'desc', 'version');
+        }
+
+        if (!count($migrations)) {
+            echo "No pending migrations found.\n";
+            exit(0);
+        }
+
+        if ($revert) {
+            krsort($migrations);
+        } else {
+            ksort($migrations);
+        }
+
+        if (2 > $argc || (!is_numeric($argv[1]) && 'all' !== $argv[1] && 'next' !== $argv[1])) {
+            echo "Pending migrations:\n";
+
+            foreach ($migrations as $version => $info) {
+                echo "\t{$version}" . ($info['desc'] ? '-' . $info['desc'] : '') . "\n";
+            }
+
+            exit(0);
+        }
+
+        if ('all' !== $argv[1] && 'next' !== $argv[1]) {
+            echo "Selecting a specific migration is not yet supported.\n";
+            exit(1);
+        }
+
+        foreach ($migrations as $version => $info) {
+            require $info['filename'];
+            $classname = "\\app\\migrations\\Migrate_{$version}";
+            $migration = new $classname($em);
+            
+            if ($revert) {
+                echo "Reverting {$version}..\n\n";
+                $migration->revert();
+                SchemaInfo::setVersion($version - 1);
+            } else {
+                echo "Applying {$version}..\n\n";
+                $migration->apply();
+                SchemaInfo::setVersion($version);
+            }
+
+            echo "Done.\n";
+            
+            if ('next' === $argv[1]) {
+                break;
+            }
+        }
+
+        $currentVersion = SchemaInfo::getVersion();
+        echo "\nCurrent version: {$currentVersion}\n";
+    }
+}
+
+DbMigrate::run();

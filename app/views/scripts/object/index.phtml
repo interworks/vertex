@@ -1,0 +1,31 @@
+<?php
+
+$this->pageTitle = 'Schemas';
+$this->pageSubTitle = $this->dbName;
+
+?>
+<table class="table table-bordred table-striped">
+<thead>
+    <tr><th>Schema</th><th>Owner</th><th>Created</th><th>Tables</th><th>Views</th><th>Actions</th></tr>
+</thead>
+<tbody>
+<? foreach ($this->schemas as $schema): ?>
+    <tr>
+        <td>
+            <a href="/object/schema/<?= $this->escape($schema['schema_name']) ?>">
+                <?= $this->escape($schema['schema_name']) ?>
+            </a>
+        </td>
+        <td><?= $this->escape($schema['schema_owner']) ?></td>
+        <td>
+            <?= $this->date($schema['create_time']) ?>
+            <em>(<?= $this->timeDiff($schema['create_time']) ?>)</em>
+        </td>
+        <td><?= $this->escape($schema['num_tables']) ?></td>
+        <td><?= $this->escape($schema['num_views']) ?></td>
+        <td><a href="/object/schema/<?= $this->escape($schema['schema_name']) ?>/export" class="btn btn-small">Export DDLs</a></td>
+    </tr>
+<? endforeach; ?>
+</tbody>
+</table>
+</ul>

@@ -1,0 +1,41 @@
+<?php
+
+$this->pageTitle = 'Diagnostics';
+
+?>
+<p>To perform a basic check-up on your Vertica cluster, click the "Run Diagnostics" button below. <em>Please note: This may take a long time to run.</em></p>
+<p><button class="btn btn-warning">Run Diagnostics</button></p>
+
+<h3>Operating System &amp; Hardware</h3>
+
+<p><span class="label label-success">Pass</span> Hardware consistent</p>
+<p><span class="label label-success">Pass</span> Operating system versions consistent</p>
+<p><span class="label label-success">Pass</span> Disk space OK</p>
+<p><span class="label label-important">Fail</span> Catalog volume should be on separate disk/partition from data volume</p>
+
+<h3>General</h3>
+
+<p><span class="label label-warning">Warning</span> Vertica license expiring soon (in 2 weeks)</p>
+<p><span class="label label-success">Pass</span> Vertica is up to date <em>(Vertica Analytic Database v6.1.2-0)</em></p>
+
+<h3>Configuration</h3>
+<p><span class="label label-success">Pass</span> ResLowLimPctOfHighLim set OK</p>
+<p><span class="label label-success">Pass</span> Global session profiling is enabled</p>
+<p><span class="label label-success">Pass</span> Global query profiling is enabled</p>
+<p><span class="label label-success">Pass</span> Global EE profiling is disabled</p>
+<p><span class="label label-success">Pass</span> Elastic cluster enabled</p>
+<p><span class="label label-success">Pass</span> Local segmentation enabled</p>
+<p><span class="label label-success">Pass</span> Query repository disabled</p>
+<p><span class="label label-warning">Warning</span> <strong>4</strong> configuration parameters set to non-default values</p>
+
+<h3>Logical Schema</h3>
+
+<p><span class="label label-warning">Warning</span> <strong>2</strong> tables do not have primary key constraints defined</p>
+<p><span class="label label-warning">Warning</span> There are no foreign key constraints defined for any tables</p>
+
+<h3>Physical Schema</h3>
+
+<p><span class="label label-success">Pass</span> Database designer has been executed</p>
+<p><span class="label label-success">Pass</span> Number of ROS containers per projection/node OK</p>
+<p><span class="label label-success">Pass</span> Number of tables per projection OK</p>
+<p><span class="label label-important">Fail</span> No tables are currently partitioned</p>
